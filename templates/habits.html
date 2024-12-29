@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block title %}Habits - Personal Growth Tracker{% endblock %}
+
+{% block content %}
+<div class="habits-container">
+    <div class="card">
+        <h2>🌱 Daily Habits</h2>
+        <div class="habits-input-container glass">
+            <input type="text" id="habit-input" placeholder="Add a new habit...">
+            <select id="habit-category" class="category-select">
+                <option value="health">Health & Fitness</option>
+                <option value="productivity">Productivity</option>
+                <option value="mindfulness">Mindfulness</option>
+                <option value="learning">Learning</option>
+                <option value="other">Other</option>
+            </select>
+            <button class="primary-btn" onclick="addHabit()">Add Habit</button>
+        </div>
+
+        <div class="habits-filters">
+            <button class="filter-pill active" data-filter="all">All</button>
+            <button class="filter-pill" data-filter="health">Health</button>
+            <button class="filter-pill" data-filter="productivity">Productivity</button>
+            <button class="filter-pill" data-filter="mindfulness">Mindfulness</button>
+            <button class="filter-pill" data-filter="learning">Learning</button>
+        </div>
+
+        <div class="habits-list" id="habits-list">
+            <!-- Habits will be dynamically added here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.habits-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.habits-input-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+}
+
+#habit-input {
+    flex: 1;
+    font-size: 1rem;
+}
+
+.category-select {
+    min-width: 150px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236C5CE7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.habits-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-pill {
+    padding: 0.5rem 1.25rem;
+    border: none;
+    background: var(--surface-color);
+    color: var(--text-secondary);
+    border-radius: 100px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.filter-pill:hover {
+    background: var(--primary-gradient);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.filter-pill.active {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.habits-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.habit-item {
+    background: var(--surface-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    transition: var(--transition-medium);
+    position: relative;
+    animation: slideIn 0.3s ease-out;
+}
+
+.habit-item:hover {
+    transform: translateY(-2px);
+    background: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.habit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.habit-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-color);
+}
+
+.habit-category {
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background: var(--secondary-gradient);
+    color: var(--text-color);
+}
+
+.habit-streak {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    font-weight: 500;
+}
+
+.streak-count {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.9rem;
+}
+
+.habit-progress {
+    background: var(--surface-color);
+    height: 8px;
+    border-radius: 100px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--primary-gradient);
+    border-radius: 100px;
+    transition: width var(--transition-medium);
+}
+
+.habit-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.habit-complete {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 100px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.habit-complete:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.habit-complete.completed {
+    background: var(--secondary-gradient);
+}
+
+.habit-delete {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: var(--transition-fast);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.habit-delete:hover {
+    background: var(--accent-gradient);
+    color: white;
+    transform: rotate(90deg);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .habits-filters {
+        justify-content: center;
+    }
+
+    .habits-input-container {
+        flex-direction: column;
+    }
+
+    .habits-list {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let habits = [];
+let currentFilter = 'all';
+
+async function loadHabits() {
+    const response = await fetch('/api/habits');
+    habits = Object.values(await response.json());
+    renderHabits();
+}
+
+function renderHabits() {
+    const habitsList = document.getElementById('habits-list');
+    habitsList.innerHTML = '';
+    
+    const filteredHabits = habits.filter(habit => {
+        if (currentFilter === 'all') return true;
+        return habit.category === currentFilter;
+    });
+
+    filteredHabits.forEach(habit => {
+        const progress = (habit.completedDays / 30) * 100;
+        const habitItem = document.createElement('div');
+        habitItem.className = 'habit-item';
+        habitItem.innerHTML = `
+            <div class="habit-header">
+                <span class="habit-title">${habit.title}</span>
+                <span class="habit-category">${habit.category}</span>
+            </div>
+            <div class="habit-streak">
+                <span class="streak-count">${habit.currentStreak} days</span>
+                <span>Current Streak</span>
+            </div>
+            <div class="habit-progress">
+                <div class="progress-bar" style="width: ${progress}%"></div>
+            </div>
+            <div class="habit-actions">
+                <button class="habit-complete ${habit.completedToday ? 'completed' : ''}" 
+                    onclick="toggleHabit('${habit.id}')">
+                    ${habit.completedToday ? 'Completed' : 'Complete'}
+                </button>
+                <button class="habit-delete" onclick="deleteHabit('${habit.id}')">×</button>
+            </div>
+        `;
+        habitsList.appendChild(habitItem);
+    });
+}
+
+async function addHabit() {
+    const input = document.getElementById('habit-input');
+    const category = document.getElementById('habit-category');
+    
+    if (!input.value.trim()) return;
+
+    const response = await fetch('/api/habits', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            title: input.value,
+            category: category.value,
+            currentStreak: 0,
+            completedDays: 0,
+            completedToday: false
+        })
+    });
+
+    const newHabit = await response.json();
+    habits.push(newHabit);
+    input.value = '';
+    renderHabits();
+}
+
+async function toggleHabit(id) {
+    const habit = habits.find(h => h.id === id);
+    if (!habit) return;
+
+    habit.completedToday = !habit.completedToday;
+    if (habit.completedToday) {
+        habit.currentStreak++;
+        habit.completedDays++;
+    } else {
+        habit.currentStreak--;
+        habit.completedDays--;
+    }
+
+    await fetch(`/api/habits/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(habit)
+    });
+
+    renderHabits();
+}
+
+async function deleteHabit(id) {
+    await fetch(`/api/habits/${id}`, {
+        method: 'DELETE'
+    });
+
+    habits = habits.filter(h => h.id !== id);
+    renderHabits();
+}
+
+// Filter handling
+document.querySelectorAll('.filter-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelector('.filter-pill.active').classList.remove('active');
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderHabits();
+    });
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', loadHabits);
+</script>
+{% endblock %} 

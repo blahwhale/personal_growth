@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Personal Growth Tracker{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+    <style>
+        :root {
+            /* Modern Color Palette */
+            --primary-gradient: linear-gradient(135deg, #6C5CE7, #a393eb);
+            --secondary-gradient: linear-gradient(135deg, #a8e6cf, #7ed6b9);
+            --accent-gradient: linear-gradient(135deg, #FF6B6B, #ff9797);
+            --background-color: #FFFFFF;
+            --surface-color: #F7F8FA;
+            --card-background: rgba(255, 255, 255, 0.8);
+            --text-color: #1D1D1F;
+            --text-secondary: #86868B;
+            --border-radius: 16px;
+            --blur-effect: blur(20px);
+            
+            /* Modern Shadows */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.1);
+            
+            /* Modern Transitions */
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-medium: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        nav {
+            background: var(--card-background);
+            backdrop-filter: var(--blur-effect);
+            -webkit-backdrop-filter: var(--blur-effect);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .nav-item {
+            color: var(--text-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: var(--transition-fast);
+            opacity: 0.8;
+            font-size: 0.95rem;
+        }
+
+        .nav-item:hover {
+            opacity: 1;
+            transform: translateY(-1px);
+        }
+
+        .nav-item .icon {
+            font-size: 1.2rem;
+        }
+
+        main {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .date {
+            font-size: 2.5rem;
+            font-weight: 600;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .weather {
+            background: var(--surface-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 100px;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            font-weight: 500;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card {
+            background: var(--card-background);
+            backdrop-filter: var(--blur-effect);
+            -webkit-backdrop-filter: var(--blur-effect);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition-medium);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .primary-btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 100px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        input, textarea, select {
+            background: var(--surface-color);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: var(--transition-fast);
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: rgba(108, 92, 231, 0.5);
+            box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 1.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--surface-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #D1D1D6;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #C7C7CC;
+        }
+
+        /* Glass Morphism Effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: var(--blur-effect);
+            -webkit-backdrop-filter: var(--blur-effect);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Modern Grid Layout */
+        .grid {
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-items {
+                overflow-x: auto;
+                padding-bottom: 1rem;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .date {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">Personal Growth Tracker</div>
+        <div class="nav-items">
+            <a href="{{ url_for('index') }}" class="nav-item">🏠 Home</a>
+            <a href="{{ url_for('todo') }}" class="nav-item">✨ Todo</a>
+            <a href="{{ url_for('gratitude') }}" class="nav-item">💫 Gratitude</a>
+            <a href="{{ url_for('habits') }}" class="nav-item">🌱 Habits</a>
+            <a href="{{ url_for('weekly') }}" class="nav-item">📈 Weekly Review</a>
+            <a href="{{ url_for('takeaways') }}" class="nav-item">💡 Takeaways</a>
+            <a href="{{ url_for('goals') }}" class="nav-item">🎯 Goals</a>
+            <a href="{{ url_for('history') }}" class="nav-item">📊 History</a>
+        </div>
+    </nav>
+    
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}Todo - Personal Growth Tracker{% endblock %}
+
+{% block content %}
+<div class="todo-container">
+    <div class="card">
+        <h2>✨ Daily Tasks</h2>
+        <div class="todo-input-container glass">
+            <input type="text" id="todo-input" placeholder="Add a new task...">
+            <select id="todo-priority" class="priority-select">
+                <option value="low">Low Priority</option>
+                <option value="medium">Medium Priority</option>
+                <option value="high">High Priority</option>
+            </select>
+            <button class="primary-btn" onclick="addTodo()">Add Task</button>
+        </div>
+        
+        <div class="todo-filters">
+            <button class="filter-pill active" data-filter="all">All</button>
+            <button class="filter-pill" data-filter="active">Active</button>
+            <button class="filter-pill" data-filter="completed">Completed</button>
+        </div>
+
+        <div class="todo-list" id="todo-list">
+            <!-- Tasks will be dynamically added here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.todo-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.todo-input-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+}
+
+#todo-input {
+    flex: 1;
+    font-size: 1rem;
+}
+
+.priority-select {
+    min-width: 150px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236C5CE7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.todo-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.filter-pill {
+    padding: 0.5rem 1.25rem;
+    border: none;
+    background: var(--surface-color);
+    color: var(--text-secondary);
+    border-radius: 100px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.filter-pill:hover {
+    background: var(--primary-gradient);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.filter-pill.active {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.todo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.todo-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: var(--surface-color);
+    border-radius: var(--border-radius);
+    gap: 1rem;
+    transition: var(--transition-medium);
+}
+
+.todo-item:hover {
+    transform: translateX(4px);
+    background: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.todo-item.completed {
+    opacity: 0.7;
+}
+
+.todo-item.completed .todo-text {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+}
+
+.todo-checkbox {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 2px solid var(--text-secondary);
+    cursor: pointer;
+    position: relative;
+    transition: var(--transition-fast);
+    background: white;
+    flex-shrink: 0;
+}
+
+.todo-checkbox:checked {
+    background: var(--primary-gradient);
+    border-color: transparent;
+}
+
+.todo-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    color: white;
+    font-size: 14px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.todo-text {
+    flex: 1;
+    font-size: 1rem;
+    transition: var(--transition-fast);
+}
+
+.todo-priority {
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.todo-priority.high {
+    background: linear-gradient(135deg, #FF6B6B, #ff9797);
+    color: white;
+}
+
+.todo-priority.medium {
+    background: linear-gradient(135deg, #FFD93D, #ffe584);
+    color: #1D1D1F;
+}
+
+.todo-priority.low {
+    background: linear-gradient(135deg, #a8e6cf, #7ed6b9);
+    color: #1D1D1F;
+}
+
+.todo-delete {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: var(--transition-fast);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.todo-delete:hover {
+    background: var(--accent-gradient);
+    color: white;
+    transform: rotate(90deg);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.todo-item {
+    animation: slideIn 0.3s ease-out;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let todos = [];
+let currentFilter = 'all';
+
+async function loadTodos() {
+    const response = await fetch('/api/todos');
+    todos = Object.values(await response.json());
+    renderTodos();
+}
+
+function renderTodos() {
+    const todoList = document.getElementById('todo-list');
+    todoList.innerHTML = '';
+    
+    const filteredTodos = todos.filter(todo => {
+        if (currentFilter === 'active') return !todo.completed;
+        if (currentFilter === 'completed') return todo.completed;
+        return true;
+    });
+
+    filteredTodos.forEach(todo => {
+        const todoItem = document.createElement('div');
+        todoItem.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+        todoItem.innerHTML = `
+            <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} 
+                onclick="toggleTodo('${todo.id}')">
+            <span class="todo-text">${todo.text}</span>
+            <span class="todo-priority ${todo.priority}">${todo.priority}</span>
+            <button class="todo-delete" onclick="deleteTodo('${todo.id}')">×</button>
+        `;
+        todoList.appendChild(todoItem);
+    });
+}
+
+async function addTodo() {
+    const input = document.getElementById('todo-input');
+    const priority = document.getElementById('todo-priority');
+    
+    if (!input.value.trim()) return;
+
+    const response = await fetch('/api/todos', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            text: input.value,
+            priority: priority.value
+        })
+    });
+
+    const newTodo = await response.json();
+    todos.push(newTodo);
+    input.value = '';
+    renderTodos();
+}
+
+async function toggleTodo(id) {
+    const todo = todos.find(t => t.id === id);
+    if (!todo) return;
+
+    todo.completed = !todo.completed;
+    await fetch(`/api/todos/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(todo)
+    });
+
+    renderTodos();
+}
+
+async function deleteTodo(id) {
+    await fetch(`/api/todos/${id}`, {
+        method: 'DELETE'
+    });
+
+    todos = todos.filter(t => t.id !== id);
+    renderTodos();
+}
+
+// Filter handling
+document.querySelectorAll('.filter-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelector('.filter-pill.active').classList.remove('active');
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderTodos();
+    });
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', loadTodos);
+</script>
+{% endblock %} 

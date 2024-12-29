@@ -1,0 +1,194 @@
+:root {
+    --primary-color: #6C5CE7;
+    --secondary-color: #a8a4e6;
+    --background-color: #f8f9fa;
+    --card-background: #ffffff;
+    --text-color: #2d3436;
+    --border-radius: 12px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: var(--background-color);
+}
+
+nav {
+    background-color: var(--primary-color);
+    padding: 1rem 2rem;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.nav-items {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-item {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.9;
+    transition: opacity 0.3s;
+}
+
+.nav-item:hover {
+    opacity: 1;
+}
+
+main {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.date {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.weather {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.quote-box {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+}
+
+.quote {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.author {
+    opacity: 0.9;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.card {
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.pomodoro-card {
+    text-align: center;
+}
+
+.timer .time {
+    font-size: 4rem;
+    font-weight: 600;
+    color: #ff9f9f;
+    margin: 1rem 0;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.controls button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+.controls button:hover {
+    background-color: var(--background-color);
+}
+
+.pomodoro-count {
+    background-color: #ffe8e8;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin: 1rem 0;
+}
+
+.pomodoro-modes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.pomodoro-modes button {
+    background: none;
+    border: 1px solid var(--primary-color);
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.pomodoro-modes button:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.primary-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background-color 0.3s;
+}
+
+.primary-btn:hover {
+    background-color: var(--secondary-color);
+}
+
+h2 {
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+p {
+    color: #666;
+    margin-bottom: 1rem;
+} 

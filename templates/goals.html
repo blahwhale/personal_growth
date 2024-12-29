@@ -1,0 +1,685 @@
+{% extends "base.html" %}
+
+{% block title %}Goals - Personal Growth Tracker{% endblock %}
+
+{% block content %}
+<div class="goals-container">
+    <div class="card">
+        <h2>🎯 Project Goals</h2>
+        <div class="goals-input-container glass">
+            <div class="goal-main-input">
+                <textarea id="goal-input" placeholder="What's your goal?" rows="2"></textarea>
+                <div class="goal-meta">
+                    <select id="goal-category" class="category-select">
+                        <option value="career">Career</option>
+                        <option value="personal">Personal</option>
+                        <option value="learning">Learning</option>
+                        <option value="health">Health</option>
+                        <option value="financial">Financial</option>
+                    </select>
+                    <select id="goal-priority" class="priority-select">
+                        <option value="high">High Priority</option>
+                        <option value="medium">Medium Priority</option>
+                        <option value="low">Low Priority</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="goal-details">
+                <div class="milestone-section">
+                    <h4>🏃‍♂️ Milestones</h4>
+                    <div class="milestone-list" id="milestone-list">
+                        <div class="milestone-input">
+                            <input type="text" placeholder="Add a milestone" id="milestone-input">
+                            <button class="add-milestone-btn" onclick="addMilestone()">+</button>
+                        </div>
+                        <div id="milestones-container">
+                            <!-- Milestones will be added here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="deadline-section">
+                    <h4>📅 Target Date</h4>
+                    <input type="date" id="goal-deadline" class="date-input">
+                </div>
+            </div>
+
+            <button class="primary-btn" onclick="addGoal()">Create Goal</button>
+        </div>
+
+        <div class="goals-filters">
+            <div class="filter-group">
+                <button class="filter-pill active" data-filter="all">All</button>
+                <button class="filter-pill" data-filter="active">Active</button>
+                <button class="filter-pill" data-filter="completed">Completed</button>
+            </div>
+            <div class="category-group">
+                <button class="filter-pill" data-category="career">Career</button>
+                <button class="filter-pill" data-category="personal">Personal</button>
+                <button class="filter-pill" data-category="learning">Learning</button>
+                <button class="filter-pill" data-category="health">Health</button>
+                <button class="filter-pill" data-category="financial">Financial</button>
+            </div>
+        </div>
+
+        <div class="goals-grid" id="goals-grid">
+            <!-- Goals will be dynamically added here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.goals-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.goals-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+}
+
+.goal-main-input {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+#goal-input {
+    width: 100%;
+    font-size: 1.1rem;
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.6;
+}
+
+.goal-meta {
+    display: flex;
+    gap: 1rem;
+}
+
+.category-select, .priority-select {
+    min-width: 150px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236C5CE7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.goal-details {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+.milestone-section, .deadline-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.milestone-section h4, .deadline-section h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.milestone-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.milestone-input {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.milestone-input input {
+    flex: 1;
+}
+
+.add-milestone-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-milestone-btn:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-sm);
+}
+
+.milestone-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--surface-color);
+    border-radius: var(--border-radius);
+    animation: slideIn 0.3s ease-out;
+}
+
+.milestone-checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 2px solid var(--text-secondary);
+    cursor: pointer;
+    position: relative;
+    transition: var(--transition-fast);
+    background: white;
+}
+
+.milestone-checkbox:checked {
+    background: var(--primary-gradient);
+    border-color: transparent;
+}
+
+.milestone-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    color: white;
+    font-size: 12px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.milestone-text {
+    flex: 1;
+    font-size: 0.95rem;
+}
+
+.milestone-delete {
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: var(--transition-fast);
+}
+
+.milestone-delete:hover {
+    color: var(--accent-gradient);
+    transform: scale(1.1);
+}
+
+.date-input {
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    border: none;
+    background: var(--surface-color);
+    font-size: 1rem;
+    color: var(--text-color);
+    width: 100%;
+}
+
+.goals-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.filter-group, .category-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-pill {
+    padding: 0.5rem 1.25rem;
+    border: none;
+    background: var(--surface-color);
+    color: var(--text-secondary);
+    border-radius: 100px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.filter-pill:hover {
+    background: var(--primary-gradient);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.filter-pill.active {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.goals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.goal-card {
+    background: var(--surface-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    transition: var(--transition-medium);
+    animation: slideIn 0.3s ease-out;
+}
+
+.goal-card:hover {
+    transform: translateY(-2px);
+    background: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.goal-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.goal-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.goal-category {
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background: var(--secondary-gradient);
+    color: var(--text-color);
+}
+
+.goal-priority {
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.goal-priority.high {
+    background: linear-gradient(135deg, #FF6B6B, #ff9797);
+    color: white;
+}
+
+.goal-priority.medium {
+    background: linear-gradient(135deg, #FFD93D, #ffe584);
+    color: #1D1D1F;
+}
+
+.goal-priority.low {
+    background: linear-gradient(135deg, #a8e6cf, #7ed6b9);
+    color: #1D1D1F;
+}
+
+.goal-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+    line-height: 1.4;
+    margin: 1rem 0;
+}
+
+.goal-progress {
+    margin: 1rem 0;
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--surface-color);
+    border-radius: 100px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary-gradient);
+    border-radius: 100px;
+    transition: width var(--transition-medium);
+}
+
+.goal-milestones {
+    margin: 1rem 0;
+}
+
+.goal-milestone {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.goal-deadline {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 1rem;
+}
+
+.goal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.goal-complete {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 100px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.goal-complete:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.goal-complete.completed {
+    background: var(--secondary-gradient);
+}
+
+.goal-delete {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: var(--transition-fast);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.goal-delete:hover {
+    background: var(--accent-gradient);
+    color: white;
+    transform: rotate(90deg);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .goals-input-container {
+        padding: 1.5rem;
+    }
+
+    .goal-meta {
+        flex-direction: column;
+    }
+
+    .goal-details {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-group, .category-group {
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let goals = [];
+let currentMilestones = [];
+let currentFilter = 'all';
+let currentCategory = 'all';
+
+async function loadGoals() {
+    const response = await fetch('/api/goals');
+    goals = Object.values(await response.json());
+    renderGoals();
+}
+
+function formatDate(date) {
+    return new Date(date).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+    });
+}
+
+function addMilestone() {
+    const input = document.getElementById('milestone-input');
+    if (!input.value.trim()) return;
+
+    const milestone = {
+        id: Date.now(),
+        text: input.value,
+        completed: false
+    };
+
+    currentMilestones.push(milestone);
+    input.value = '';
+    renderMilestones();
+}
+
+function renderMilestones() {
+    const container = document.getElementById('milestones-container');
+    container.innerHTML = currentMilestones.map(milestone => `
+        <div class="milestone-item">
+            <input type="checkbox" class="milestone-checkbox" ${milestone.completed ? 'checked' : ''} 
+                onchange="toggleMilestone(${milestone.id})">
+            <span class="milestone-text">${milestone.text}</span>
+            <span class="milestone-delete" onclick="deleteMilestone(${milestone.id})">×</span>
+        </div>
+    `).join('');
+}
+
+function toggleMilestone(id) {
+    const milestone = currentMilestones.find(m => m.id === id);
+    if (milestone) {
+        milestone.completed = !milestone.completed;
+        renderMilestones();
+    }
+}
+
+function deleteMilestone(id) {
+    currentMilestones = currentMilestones.filter(m => m.id !== id);
+    renderMilestones();
+}
+
+function renderGoals() {
+    const goalsGrid = document.getElementById('goals-grid');
+    goalsGrid.innerHTML = '';
+    
+    const filteredGoals = goals.filter(goal => {
+        const matchesStatus = currentFilter === 'all' || 
+            (currentFilter === 'completed' ? goal.completed : !goal.completed);
+        const matchesCategory = currentCategory === 'all' || goal.category === currentCategory;
+        return matchesStatus && matchesCategory;
+    });
+
+    filteredGoals.forEach(goal => {
+        const progress = goal.milestones.length > 0 
+            ? (goal.milestones.filter(m => m.completed).length / goal.milestones.length) * 100 
+            : 0;
+        
+        const goalCard = document.createElement('div');
+        goalCard.className = 'goal-card';
+        goalCard.innerHTML = `
+            <div class="goal-card-header">
+                <div class="goal-info">
+                    <span class="goal-category">${goal.category}</span>
+                    <span class="goal-priority ${goal.priority}">${goal.priority}</span>
+                </div>
+                <div class="goal-deadline">
+                    <span>📅</span>
+                    <span>${formatDate(goal.deadline)}</span>
+                </div>
+            </div>
+            <h3 class="goal-title">${goal.title}</h3>
+            <div class="goal-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progress}%"></div>
+                </div>
+            </div>
+            <div class="goal-milestones">
+                ${goal.milestones.map(milestone => `
+                    <div class="goal-milestone">
+                        <input type="checkbox" class="milestone-checkbox" ${milestone.completed ? 'checked' : ''} 
+                            onchange="toggleGoalMilestone('${goal.id}', ${milestone.id})">
+                        <span class="milestone-text">${milestone.text}</span>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="goal-actions">
+                <button class="goal-complete ${goal.completed ? 'completed' : ''}" 
+                    onclick="toggleGoal('${goal.id}')">
+                    ${goal.completed ? 'Completed' : 'Complete'}
+                </button>
+                <button class="goal-delete" onclick="deleteGoal('${goal.id}')">×</button>
+            </div>
+        `;
+        goalsGrid.appendChild(goalCard);
+    });
+}
+
+async function addGoal() {
+    const title = document.getElementById('goal-input').value.trim();
+    const category = document.getElementById('goal-category').value;
+    const priority = document.getElementById('goal-priority').value;
+    const deadline = document.getElementById('goal-deadline').value;
+    
+    if (!title || !deadline) {
+        alert('Please fill in the goal title and deadline.');
+        return;
+    }
+
+    const response = await fetch('/api/goals', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            title,
+            category,
+            priority,
+            deadline,
+            milestones: currentMilestones,
+            completed: false,
+            date: new Date().toISOString()
+        })
+    });
+
+    const newGoal = await response.json();
+    goals.unshift(newGoal);
+    
+    // Reset form
+    document.getElementById('goal-input').value = '';
+    document.getElementById('goal-deadline').value = '';
+    currentMilestones = [];
+    renderMilestones();
+    renderGoals();
+}
+
+async function toggleGoal(id) {
+    const goal = goals.find(g => g.id === id);
+    if (!goal) return;
+
+    goal.completed = !goal.completed;
+    await fetch(`/api/goals/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(goal)
+    });
+
+    renderGoals();
+}
+
+async function toggleGoalMilestone(goalId, milestoneId) {
+    const goal = goals.find(g => g.id === goalId);
+    if (!goal) return;
+
+    const milestone = goal.milestones.find(m => m.id === milestoneId);
+    if (!milestone) return;
+
+    milestone.completed = !milestone.completed;
+    await fetch(`/api/goals/${goalId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(goal)
+    });
+
+    renderGoals();
+}
+
+async function deleteGoal(id) {
+    await fetch(`/api/goals/${id}`, {
+        method: 'DELETE'
+    });
+
+    goals = goals.filter(g => g.id !== id);
+    renderGoals();
+}
+
+// Filter handling
+document.querySelectorAll('.filter-group .filter-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelector('.filter-group .filter-pill.active')?.classList.remove('active');
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderGoals();
+    });
+});
+
+// Category handling
+document.querySelectorAll('.category-group .filter-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelector('.category-group .filter-pill.active')?.classList.remove('active');
+        btn.classList.add('active');
+        currentCategory = btn.dataset.category;
+        renderGoals();
+    });
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', loadGoals);
+</script>
+{% endblock %} 

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Personal Growth Tracker{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1 class="date">{{ now.strftime('%B %d, %Y').upper() }}</h1>
+    <div class="weather glass">
+        <span class="temp">72°F</span>
+        <span class="condition">Clear</span>
+    </div>
+</div>
+
+<div class="quote-box card">
+    <p class="quote">A calm mind, a fit body, and a house full of love. These things cannot be bought. They must be earned.</p>
+    <p class="author">— Naval Ravikant</p>
+</div>
+
+<div class="dashboard-grid grid">
+    <div class="pomodoro-card card">
+        <h2>🍅 Pomodoro</h2>
+        <div class="timer">
+            <div class="time">25:00</div>
+            <div class="controls">
+                <button class="primary-btn play">Start</button>
+                <button class="primary-btn reset">Reset</button>
+            </div>
+            <div class="pomodoro-count">
+                <span>0 / 4</span>
+                <p>Pomodoros Today</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Pomodoro Timer Logic
+let time = 25 * 60;
+let isRunning = false;
+let timer;
+
+function updateDisplay() {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    document.querySelector('.time').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+document.querySelector('.play').addEventListener('click', function() {
+    if (!isRunning) {
+        isRunning = true;
+        this.textContent = 'Pause';
+        timer = setInterval(() => {
+            time--;
+            updateDisplay();
+            if (time === 0) {
+                clearInterval(timer);
+                isRunning = false;
+                this.textContent = 'Start';
+            }
+        }, 1000);
+    } else {
+        clearInterval(timer);
+        isRunning = false;
+        this.textContent = 'Start';
+    }
+});
+
+document.querySelector('.reset').addEventListener('click', function() {
+    clearInterval(timer);
+    isRunning = false;
+    time = 25 * 60;
+    updateDisplay();
+    document.querySelector('.play').textContent = 'Start';
+});
+
+// Update date
+const now = new Date();
+document.querySelector('.date').textContent = now.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+}).toUpperCase();
+</script>
+{% endblock %} 

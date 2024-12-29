@@ -1,0 +1,445 @@
+{% extends "base.html" %}
+
+{% block title %}Weekly Review - Personal Growth Tracker{% endblock %}
+
+{% block content %}
+<div class="weekly-container">
+    <div class="card">
+        <h2>📅 Weekly Review</h2>
+        <div class="weekly-input-container glass">
+            <div class="week-selector">
+                <button class="arrow-btn" onclick="previousWeek()">←</button>
+                <h3 id="current-week">Week of September 25, 2023</h3>
+                <button class="arrow-btn" onclick="nextWeek()">→</button>
+            </div>
+
+            <div class="review-sections">
+                <div class="review-section">
+                    <h4>🎯 Achievements</h4>
+                    <textarea id="achievements" placeholder="What were your main achievements this week?" rows="3"></textarea>
+                </div>
+
+                <div class="review-section">
+                    <h4>💡 Learnings</h4>
+                    <textarea id="learnings" placeholder="What did you learn? What insights did you gain?" rows="3"></textarea>
+                </div>
+
+                <div class="review-section">
+                    <h4>🚀 Goals for Next Week</h4>
+                    <textarea id="goals" placeholder="What do you want to accomplish next week?" rows="3"></textarea>
+                </div>
+
+                <div class="review-section">
+                    <h4>🌟 Energy Level</h4>
+                    <div class="energy-selector">
+                        <button class="energy-btn" data-level="low">Low</button>
+                        <button class="energy-btn" data-level="medium">Medium</button>
+                        <button class="energy-btn" data-level="high">High</button>
+                    </div>
+                </div>
+
+                <div class="review-section">
+                    <h4>📊 Progress Rating</h4>
+                    <div class="rating-selector">
+                        <input type="range" id="progress-rating" min="1" max="10" value="7">
+                        <span id="rating-value">7/10</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="primary-btn" onclick="saveWeeklyReview()">Save Review</button>
+        </div>
+
+        <div class="weekly-history" id="weekly-history">
+            <!-- Previous reviews will be dynamically added here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.weekly-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.weekly-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+}
+
+.week-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.arrow-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+}
+
+.arrow-btn:hover {
+    background: var(--surface-color);
+    color: var(--text-color);
+    transform: scale(1.1);
+}
+
+.review-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.review-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.review-section h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.review-section textarea {
+    width: 100%;
+    font-size: 1rem;
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+}
+
+.energy-selector {
+    display: flex;
+    gap: 1rem;
+}
+
+.energy-btn {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 100px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    background: var(--surface-color);
+    color: var(--text-secondary);
+}
+
+.energy-btn:hover {
+    transform: translateY(-1px);
+}
+
+.energy-btn.selected[data-level="low"] {
+    background: linear-gradient(135deg, #FF6B6B, #ff9797);
+    color: white;
+}
+
+.energy-btn.selected[data-level="medium"] {
+    background: linear-gradient(135deg, #FFD93D, #ffe584);
+    color: #1D1D1F;
+}
+
+.energy-btn.selected[data-level="high"] {
+    background: linear-gradient(135deg, #a8e6cf, #7ed6b9);
+    color: #1D1D1F;
+}
+
+.rating-selector {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+input[type="range"] {
+    flex: 1;
+    height: 8px;
+    border-radius: 100px;
+    background: var(--surface-color);
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+#rating-value {
+    font-weight: 500;
+    min-width: 48px;
+    text-align: center;
+}
+
+.weekly-history {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.review-item {
+    background: var(--surface-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    transition: var(--transition-medium);
+    animation: slideIn 0.3s ease-out;
+}
+
+.review-item:hover {
+    transform: translateY(-2px);
+    background: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.review-date {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.review-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.stat-pill {
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.review-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.content-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.content-section h5 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.content-section p {
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .weekly-input-container {
+        padding: 1.5rem;
+    }
+
+    .energy-selector {
+        flex-direction: column;
+    }
+
+    .review-content {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let weeklyReviews = [];
+let currentDate = new Date();
+let selectedEnergy = null;
+
+function formatWeekDate(date) {
+    return new Date(date).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+    });
+}
+
+function updateWeekDisplay() {
+    const weekStart = new Date(currentDate);
+    weekStart.setDate(currentDate.getDate() - currentDate.getDay());
+    document.getElementById('current-week').textContent = `Week of ${formatWeekDate(weekStart)}`;
+}
+
+function previousWeek() {
+    currentDate.setDate(currentDate.getDate() - 7);
+    updateWeekDisplay();
+    loadWeeklyReview();
+}
+
+function nextWeek() {
+    currentDate.setDate(currentDate.getDate() + 7);
+    updateWeekDisplay();
+    loadWeeklyReview();
+}
+
+// Handle energy level selection
+document.querySelectorAll('.energy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelector('.energy-btn.selected')?.classList.remove('selected');
+        btn.classList.add('selected');
+        selectedEnergy = btn.dataset.level;
+    });
+});
+
+// Handle progress rating
+const ratingInput = document.getElementById('progress-rating');
+const ratingValue = document.getElementById('rating-value');
+ratingInput.addEventListener('input', () => {
+    ratingValue.textContent = `${ratingInput.value}/10`;
+});
+
+async function loadWeeklyReview() {
+    const response = await fetch('/api/weekly');
+    weeklyReviews = Object.values(await response.json());
+    renderWeeklyReviews();
+}
+
+function renderWeeklyReviews() {
+    const historyContainer = document.getElementById('weekly-history');
+    historyContainer.innerHTML = '';
+
+    weeklyReviews.forEach(review => {
+        const reviewItem = document.createElement('div');
+        reviewItem.className = 'review-item';
+        reviewItem.innerHTML = `
+            <div class="review-header">
+                <span class="review-date">${formatWeekDate(review.date)}</span>
+                <div class="review-stats">
+                    <span class="stat-pill" style="background: ${getEnergyColor(review.energy)}">
+                        ${review.energy} energy
+                    </span>
+                    <span class="stat-pill" style="background: var(--primary-gradient); color: white">
+                        ${review.rating}/10
+                    </span>
+                </div>
+            </div>
+            <div class="review-content">
+                <div class="content-section">
+                    <h5>🎯 Achievements</h5>
+                    <p>${review.achievements}</p>
+                </div>
+                <div class="content-section">
+                    <h5>💡 Learnings</h5>
+                    <p>${review.learnings}</p>
+                </div>
+                <div class="content-section">
+                    <h5>🚀 Goals</h5>
+                    <p>${review.goals}</p>
+                </div>
+            </div>
+        `;
+        historyContainer.appendChild(reviewItem);
+    });
+}
+
+function getEnergyColor(energy) {
+    const colors = {
+        low: 'linear-gradient(135deg, #FF6B6B, #ff9797)',
+        medium: 'linear-gradient(135deg, #FFD93D, #ffe584)',
+        high: 'linear-gradient(135deg, #a8e6cf, #7ed6b9)'
+    };
+    return colors[energy] || colors.medium;
+}
+
+async function saveWeeklyReview() {
+    const achievements = document.getElementById('achievements').value.trim();
+    const learnings = document.getElementById('learnings').value.trim();
+    const goals = document.getElementById('goals').value.trim();
+    const rating = document.getElementById('progress-rating').value;
+
+    if (!achievements || !learnings || !goals || !selectedEnergy) {
+        alert('Please fill in all fields and select your energy level.');
+        return;
+    }
+
+    const response = await fetch('/api/weekly', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            date: currentDate.toISOString(),
+            achievements,
+            learnings,
+            goals,
+            energy: selectedEnergy,
+            rating
+        })
+    });
+
+    const newReview = await response.json();
+    weeklyReviews.unshift(newReview);
+
+    // Reset form
+    document.getElementById('achievements').value = '';
+    document.getElementById('learnings').value = '';
+    document.getElementById('goals').value = '';
+    document.querySelector('.energy-btn.selected')?.classList.remove('selected');
+    document.getElementById('progress-rating').value = 7;
+    document.getElementById('rating-value').textContent = '7/10';
+    selectedEnergy = null;
+
+    renderWeeklyReviews();
+}
+
+// Initialize
+updateWeekDisplay();
+document.addEventListener('DOMContentLoaded', loadWeeklyReview);
+</script>
+{% endblock %} 

@@ -1,0 +1,534 @@
+{% extends "base.html" %}
+
+{% block title %}History - Personal Growth Tracker{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <div class="card">
+        <h2>📊 History Overview</h2>
+        
+        <div class="history-filters glass">
+            <div class="date-range">
+                <button class="filter-pill active" data-range="all">All Time</button>
+                <button class="filter-pill" data-range="month">This Month</button>
+                <button class="filter-pill" data-range="week">This Week</button>
+                <div class="custom-range">
+                    <input type="date" id="start-date" class="date-input">
+                    <span>to</span>
+                    <input type="date" id="end-date" class="date-input">
+                    <button class="filter-pill" onclick="applyDateRange()">Apply</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-sections">
+            <!-- Takeaways Section -->
+            <div class="section-panel">
+                <div class="panel-header" onclick="togglePanel('takeaways')">
+                    <div class="header-content">
+                        <span class="panel-icon">💡</span>
+                        <h3>Takeaways</h3>
+                        <span class="item-count" id="takeaways-count">0 entries</span>
+                    </div>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="panel-content" id="takeaways-panel">
+                    <!-- Content will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Gratitude Section -->
+            <div class="section-panel">
+                <div class="panel-header" onclick="togglePanel('gratitude')">
+                    <div class="header-content">
+                        <span class="panel-icon">💫</span>
+                        <h3>Gratitude</h3>
+                        <span class="item-count" id="gratitude-count">0 entries</span>
+                    </div>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="panel-content" id="gratitude-panel">
+                    <!-- Content will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Weekly Reviews Section -->
+            <div class="section-panel">
+                <div class="panel-header" onclick="togglePanel('weekly')">
+                    <div class="header-content">
+                        <span class="panel-icon">📈</span>
+                        <h3>Weekly Reviews</h3>
+                        <span class="item-count" id="weekly-count">0 entries</span>
+                    </div>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="panel-content" id="weekly-panel">
+                    <!-- Content will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Habits Section -->
+            <div class="section-panel">
+                <div class="panel-header" onclick="togglePanel('habits')">
+                    <div class="header-content">
+                        <span class="panel-icon">🌱</span>
+                        <h3>Habits</h3>
+                        <span class="item-count" id="habits-count">0 entries</span>
+                    </div>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="panel-content" id="habits-panel">
+                    <!-- Content will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Goals Section -->
+            <div class="section-panel">
+                <div class="panel-header" onclick="togglePanel('goals')">
+                    <div class="header-content">
+                        <span class="panel-icon">🎯</span>
+                        <h3>Goals</h3>
+                        <span class="item-count" id="goals-count">0 entries</span>
+                    </div>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="panel-content" id="goals-panel">
+                    <!-- Content will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Tasks Section -->
+            <div class="section-panel">
+                <div class="panel-header" onclick="togglePanel('tasks')">
+                    <div class="header-content">
+                        <span class="panel-icon">✨</span>
+                        <h3>Tasks</h3>
+                        <span class="item-count" id="tasks-count">0 entries</span>
+                    </div>
+                    <span class="expand-icon">▼</span>
+                </div>
+                <div class="panel-content" id="tasks-panel">
+                    <!-- Content will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.history-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.history-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+}
+
+.date-range {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filter-pill {
+    padding: 0.5rem 1.25rem;
+    border: none;
+    background: var(--surface-color);
+    color: var(--text-secondary);
+    border-radius: 100px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.filter-pill:hover {
+    background: var(--primary-gradient);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.filter-pill.active {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.custom-range {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.date-input {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 100px;
+    background: var(--surface-color);
+    color: var(--text-color);
+    font-size: 0.95rem;
+}
+
+.history-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.section-panel {
+    background: var(--surface-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: var(--transition-medium);
+}
+
+.section-panel:hover {
+    background: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.panel-header {
+    padding: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--transition-fast);
+}
+
+.panel-header:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.panel-icon {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    background: var(--primary-gradient);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.item-count {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+}
+
+.expand-icon {
+    color: var(--text-secondary);
+    transition: transform var(--transition-fast);
+}
+
+.section-panel.expanded .expand-icon {
+    transform: rotate(180deg);
+}
+
+.panel-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--transition-medium);
+}
+
+.section-panel.expanded .panel-content {
+    max-height: 1000px;
+}
+
+.history-item {
+    padding: 1.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    animation: slideIn 0.3s ease-out;
+}
+
+.history-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.history-item-title {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.history-item-date {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.history-item-content {
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.history-item-meta {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.meta-tag {
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    background: var(--surface-color);
+    color: var(--text-secondary);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .history-filters {
+        padding: 1rem;
+    }
+
+    .date-range {
+        justify-content: center;
+    }
+
+    .custom-range {
+        width: 100%;
+        margin: 0;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .panel-header {
+        padding: 1rem;
+    }
+
+    .history-item {
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let historyData = {
+    takeaways: [],
+    gratitude: [],
+    weekly: [],
+    habits: [],
+    goals: [],
+    tasks: []
+};
+
+async function loadHistoryData() {
+    const response = await fetch('/api/history');
+    historyData = await response.json();
+    updateCounts();
+    renderAllSections();
+}
+
+function updateCounts() {
+    Object.keys(historyData).forEach(section => {
+        const count = historyData[section].length;
+        document.getElementById(`${section}-count`).textContent = `${count} entries`;
+    });
+}
+
+function formatDate(date) {
+    return new Date(date).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
+function togglePanel(section) {
+    const panel = document.querySelector(`[id="${section}-panel"]`).parentElement;
+    panel.classList.toggle('expanded');
+}
+
+function renderTakeaways(takeaways) {
+    return takeaways.map(item => `
+        <div class="history-item">
+            <div class="history-item-header">
+                <span class="history-item-title">${item.category}</span>
+                <span class="history-item-date">${formatDate(item.date)}</span>
+            </div>
+            <div class="history-item-content">${item.content}</div>
+            <div class="history-item-meta">
+                ${item.tags.map(tag => `<span class="meta-tag">${tag}</span>`).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderGratitude(entries) {
+    return entries.map(item => `
+        <div class="history-item">
+            <div class="history-item-header">
+                <span class="history-item-title">${item.category}</span>
+                <span class="history-item-date">${formatDate(item.date)}</span>
+            </div>
+            <div class="history-item-content">${item.text}</div>
+        </div>
+    `).join('');
+}
+
+function renderWeekly(reviews) {
+    return reviews.map(review => `
+        <div class="history-item">
+            <div class="history-item-header">
+                <span class="history-item-title">Week of ${formatDate(review.date)}</span>
+                <div class="history-item-meta">
+                    <span class="meta-tag">${review.energy} energy</span>
+                    <span class="meta-tag">${review.rating}/10</span>
+                </div>
+            </div>
+            <div class="history-item-content">
+                <p><strong>Achievements:</strong> ${review.achievements}</p>
+                <p><strong>Learnings:</strong> ${review.learnings}</p>
+                <p><strong>Goals:</strong> ${review.goals}</p>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderHabits(habits) {
+    return habits.map(habit => `
+        <div class="history-item">
+            <div class="history-item-header">
+                <span class="history-item-title">${habit.title}</span>
+                <span class="history-item-date">${formatDate(habit.date)}</span>
+            </div>
+            <div class="history-item-meta">
+                <span class="meta-tag">${habit.category}</span>
+                <span class="meta-tag">${habit.currentStreak} day streak</span>
+                <span class="meta-tag">${habit.completedDays} days completed</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderGoals(goals) {
+    return goals.map(goal => `
+        <div class="history-item">
+            <div class="history-item-header">
+                <span class="history-item-title">${goal.title}</span>
+                <span class="history-item-date">Due: ${formatDate(goal.deadline)}</span>
+            </div>
+            <div class="history-item-meta">
+                <span class="meta-tag">${goal.category}</span>
+                <span class="meta-tag">${goal.priority} priority</span>
+                <span class="meta-tag">${goal.completed ? 'Completed' : 'In Progress'}</span>
+            </div>
+            <div class="history-item-content">
+                <p><strong>Milestones:</strong></p>
+                <ul>
+                    ${goal.milestones.map(m => `
+                        <li>${m.completed ? '✓' : '○'} ${m.text}</li>
+                    `).join('')}
+                </ul>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderTasks(tasks) {
+    return tasks.map(task => `
+        <div class="history-item">
+            <div class="history-item-header">
+                <span class="history-item-title">${task.text}</span>
+                <span class="history-item-date">${formatDate(task.date)}</span>
+            </div>
+            <div class="history-item-meta">
+                <span class="meta-tag">${task.priority}</span>
+                <span class="meta-tag">${task.completed ? 'Completed' : 'Active'}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderAllSections() {
+    document.getElementById('takeaways-panel').innerHTML = renderTakeaways(historyData.takeaways);
+    document.getElementById('gratitude-panel').innerHTML = renderGratitude(historyData.gratitude);
+    document.getElementById('weekly-panel').innerHTML = renderWeekly(historyData.weekly);
+    document.getElementById('habits-panel').innerHTML = renderHabits(historyData.habits);
+    document.getElementById('goals-panel').innerHTML = renderGoals(historyData.goals);
+    document.getElementById('tasks-panel').innerHTML = renderTasks(historyData.tasks);
+}
+
+function applyDateRange() {
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+    if (!startDate || !endDate) return;
+
+    // Filter data based on date range
+    Object.keys(historyData).forEach(section => {
+        historyData[section] = historyData[section].filter(item => {
+            const itemDate = new Date(item.date);
+            return itemDate >= new Date(startDate) && itemDate <= new Date(endDate);
+        });
+    });
+
+    updateCounts();
+    renderAllSections();
+}
+
+// Date range filter handling
+document.querySelectorAll('.date-range .filter-pill').forEach(btn => {
+    if (btn.dataset.range === 'apply') return;
+    
+    btn.addEventListener('click', () => {
+        document.querySelector('.date-range .filter-pill.active')?.classList.remove('active');
+        btn.classList.add('active');
+        
+        const range = btn.dataset.range;
+        const now = new Date();
+        let startDate = new Date();
+        
+        switch (range) {
+            case 'week':
+                startDate.setDate(now.getDate() - 7);
+                break;
+            case 'month':
+                startDate.setMonth(now.getMonth() - 1);
+                break;
+            case 'all':
+                startDate = new Date(0);
+                break;
+        }
+        
+        document.getElementById('start-date').value = startDate.toISOString().split('T')[0];
+        document.getElementById('end-date').value = now.toISOString().split('T')[0];
+        applyDateRange();
+    });
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', loadHistoryData);
+</script>
+{% endblock %} 

@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block title %}Gratitude - Personal Growth Tracker{% endblock %}
+
+{% block content %}
+<div class="gratitude-container">
+    <div class="card">
+        <h2>🙏 Daily Gratitude</h2>
+        <div class="gratitude-input-container glass">
+            <textarea id="gratitude-input" placeholder="What are you grateful for today?" rows="3"></textarea>
+            <select id="gratitude-category" class="category-select">
+                <option value="personal">Personal</option>
+                <option value="work">Work</option>
+                <option value="relationships">Relationships</option>
+                <option value="health">Health</option>
+                <option value="other">Other</option>
+            </select>
+            <button class="primary-btn" onclick="addGratitude()">Add Entry</button>
+        </div>
+
+        <div class="gratitude-filters">
+            <button class="filter-pill active" data-filter="all">All</button>
+            <button class="filter-pill" data-filter="personal">Personal</button>
+            <button class="filter-pill" data-filter="work">Work</button>
+            <button class="filter-pill" data-filter="relationships">Relationships</button>
+            <button class="filter-pill" data-filter="health">Health</button>
+        </div>
+
+        <div class="gratitude-list" id="gratitude-list">
+            <!-- Entries will be dynamically added here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.gratitude-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.gratitude-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+}
+
+#gratitude-input {
+    width: 100%;
+    font-size: 1rem;
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+}
+
+.category-select {
+    min-width: 150px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236C5CE7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.gratitude-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-pill {
+    padding: 0.5rem 1.25rem;
+    border: none;
+    background: var(--surface-color);
+    color: var(--text-secondary);
+    border-radius: 100px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.filter-pill:hover {
+    background: var(--primary-gradient);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.filter-pill.active {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.gratitude-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.gratitude-item {
+    background: var(--surface-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    transition: var(--transition-medium);
+    position: relative;
+    animation: slideIn 0.3s ease-out;
+}
+
+.gratitude-item:hover {
+    transform: translateY(-2px);
+    background: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.gratitude-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.gratitude-date {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.gratitude-category {
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background: var(--secondary-gradient);
+    color: var(--text-color);
+}
+
+.gratitude-text {
+    line-height: 1.6;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+}
+
+.gratitude-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.gratitude-delete {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: var(--transition-fast);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gratitude-delete:hover {
+    background: var(--accent-gradient);
+    color: white;
+    transform: rotate(90deg);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .gratitude-filters {
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let gratitudeEntries = [];
+let currentFilter = 'all';
+
+async function loadGratitudeEntries() {
+    const response = await fetch('/api/gratitude');
+    gratitudeEntries = Object.values(await response.json());
+    renderGratitudeEntries();
+}
+
+function formatDate(date) {
+    return new Date(date).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
+function renderGratitudeEntries() {
+    const gratitudeList = document.getElementById('gratitude-list');
+    gratitudeList.innerHTML = '';
+    
+    const filteredEntries = gratitudeEntries.filter(entry => {
+        if (currentFilter === 'all') return true;
+        return entry.category === currentFilter;
+    });
+
+    filteredEntries.forEach(entry => {
+        const gratitudeItem = document.createElement('div');
+        gratitudeItem.className = 'gratitude-item';
+        gratitudeItem.innerHTML = `
+            <div class="gratitude-header">
+                <span class="gratitude-date">${formatDate(entry.date)}</span>
+                <span class="gratitude-category">${entry.category}</span>
+            </div>
+            <p class="gratitude-text">${entry.text}</p>
+            <div class="gratitude-actions">
+                <button class="gratitude-delete" onclick="deleteGratitude('${entry.id}')">×</button>
+            </div>
+        `;
+        gratitudeList.appendChild(gratitudeItem);
+    });
+}
+
+async function addGratitude() {
+    const input = document.getElementById('gratitude-input');
+    const category = document.getElementById('gratitude-category');
+    
+    if (!input.value.trim()) return;
+
+    const response = await fetch('/api/gratitude', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            text: input.value,
+            category: category.value,
+            date: new Date().toISOString()
+        })
+    });
+
+    const newEntry = await response.json();
+    gratitudeEntries.push(newEntry);
+    input.value = '';
+    renderGratitudeEntries();
+}
+
+async function deleteGratitude(id) {
+    await fetch(`/api/gratitude/${id}`, {
+        method: 'DELETE'
+    });
+
+    gratitudeEntries = gratitudeEntries.filter(entry => entry.id !== id);
+    renderGratitudeEntries();
+}
+
+// Filter handling
+document.querySelectorAll('.filter-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelector('.filter-pill.active').classList.remove('active');
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderGratitudeEntries();
+    });
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', loadGratitudeEntries);
+</script>
+{% endblock %} 
